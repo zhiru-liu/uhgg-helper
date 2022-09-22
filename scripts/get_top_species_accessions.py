@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import config
 
-if len(sys.argv) ==1:
+if len(sys.argv) !=2:
     topk = 10
 else:
     topk = sys.argv[1]
