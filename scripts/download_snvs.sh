@@ -1,5 +1,5 @@
 if [[ $# -lt 1 ]]; then
-  echo "Please provide filename"
+  echo "Please provide file with mgnify accessions"
   exit 1
 fi
 

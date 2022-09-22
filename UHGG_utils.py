@@ -57,17 +57,23 @@ def process_SNVs_table(snvs_path, gene_df, save_path):
     """
     linecount = 0
     contig_dfs = {contig: df for contig, df in gene_df.groupby('Contig')}  # faster than slicing df every time changing contig
+    missing_contigs = []
     with open(snvs_path, 'r') as f:
         head = f.readline()  # will be useful when processing individual genes
         for line in f:
             items = line[:-2].split('\t')
             contig = items[0]
+            # zhiru: newly added because some gff file are missing some contigs (ex species 00060)
+            if contig not in contig_dfs:
+                if contig not in missing_contigs:
+                    missing_contigs.append(contig)
+                continue
             contig_df = contig_dfs[contig]
             pos = int(items[1])
             row = if_gene(contig_df, pos)  # sites found in multiple genes will be removed!
             if row is not None:
                 # Important: here we set how the gene files should be named
-                file_name = save_path + "{}-{}.tsv".format(contig, row['Gene ID'].squeeze())
+                file_name = os.path.join(save_path, "{}-{}.tsv".format(contig, row['Gene ID'].squeeze()))
                 with open(file_name, 'a') as g:
                     g.write(line)
             if linecount % 100000 == 0:
@@ -75,6 +81,10 @@ def process_SNVs_table(snvs_path, gene_df, save_path):
                 current_time = now.strftime("%H:%M:%S")
                 print("Finished {} at {}".format(linecount, current_time))
             linecount += 1
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Finished all at {}".format(current_time))
+    print("Missing these contigs: {}".format(missing_contigs))
 
 
 def compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False):

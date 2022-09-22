@@ -2,5 +2,9 @@ import os
 
 # define a bunch of important paths
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+GFF_DIR = os.path.expandvars("$GROUP_HOME/uhgg/genes/")
+REF_GENOME_DIR = os.path.expandvars("$GROUP_HOME/uhgg/reference_genomes/")
+SNV_DIR = os.path.expandvars("$GROUP_SCRATCH/uhgg/snvs/")
+SNV_TABLE_DIR = os.path.expandvars("$GROUP_SCRATCH/uhgg/snv_tables/")
 
 catalog_path = os.path.join(ROOT_DIR, 'dat', '41587_2020_603_MOESM3_ESM.csv')
