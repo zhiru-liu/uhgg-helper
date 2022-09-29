@@ -96,10 +96,11 @@ def compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False):
     """
     gene_files = os.listdir(grouped_snvs_base)
     num_genomes = genome_mask.sum()
+    print("In total {} genomes".format(num_genomes))
     processed = 0
     coverage_array = np.zeros((len(gene_files), num_genomes))
     for gene_file in gene_files:
-        gene_file_path = grouped_snvs_base + gene_file
+        gene_file_path = os.path.join(grouped_snvs_base, gene_file)
         dat = pd.read_csv(gene_file_path, delimiter='\t', header=None)
 
         # filtering sites with more than two alleles
@@ -109,7 +110,7 @@ def compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False):
         snvs = biallelic_dat.iloc[:, 4:].astype(int).to_numpy()
         snvs = snvs[:, genome_mask]
 
-        covered = (snvs != 255).astype(int)
+        covered = (snvs != 255).astype(float)
         coverage_array[processed, :] = covered.mean(axis=0)
         if processed % 100 == 0:
             now = datetime.now()
