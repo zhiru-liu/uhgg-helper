@@ -12,12 +12,15 @@ if len(sys.argv) !=2:
     quit()
 accession = sys.argv[1]
 
-grouped_snvs_base = os.path.join(config.ANNOTATED_SNV_DIR)
+print("Processing {}".format(accession))
+grouped_snvs_base = os.path.join(config.SNV_TABLE_DIR, accession)
 genomes_metadata = pd.read_csv(config.nr_genome_path, delimiter='\t')
 header = UHGG_utils.get_SNVs_table_header(os.path.join(config.SNV_DIR, '{}_snvs.tsv'.format(accession)))
 genome_names = UHGG_utils.get_genome_names_from_table_header(header)
 
 genome_mask = UHGG_utils.get_non_redundant_genome_mask(genomes_metadata, accession, genome_names)
+if not os.path.exists(grouped_snvs_base):
+    raise RuntimeError("SNV path not found")
 coverage_array, gene_files = UHGG_utils.compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False)
 species_core_genes = UHGG_utils.get_species_core_genes(coverage_array, gene_files)
 
