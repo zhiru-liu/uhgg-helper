@@ -138,7 +138,9 @@ def compute_core_genes(gene_names, coverage_array, coverage_threshold=0.5, preve
 def load_core_genes(species_id):
     # return json.load(open('/Volumes/Botein/uhgg/core_genes/{}/core_genes.json'.format(species_id), 'r'))
     path = os.path.join(config.CORE_GENE_DIR, species_id, 'core_genes.json')
-    return json.load(open(path, 'r'))
+    genes = json.load(open(path, 'r'))
+    # work with integer gene ids
+    return [int(x) for x in genes]
 
 def get_SNVs_table_header(snvs_path):
     with open(snvs_path, 'r') as f:
@@ -187,10 +189,11 @@ def sample_random_pair_of_genes(files, core_genes, gene_df):
     :param gene_df: parsed from gff_to_df
     :return: two gene file names
     """
+    count = 0
     while True:
         file1, file2 = random.sample(files, 2)
-        id1 = int(file1.split('.')[0].split('-')[-1])
-        id2 = int(file2.split('.')[0].split('-')[-1])
+        id1 = int(file1.split('.')[0].split('-')[1])
+        id2 = int(file2.split('.')[0].split('-')[1])
         if np.abs(id1-id2) < 15:
             continue
         type1 = gene_df.loc[id1, 'Type']
@@ -199,6 +202,9 @@ def sample_random_pair_of_genes(files, core_genes, gene_df):
             continue
         if (id1 in core_genes) and (id2 in core_genes):
             return file1, file2
+        count += 1
+        if count >= 1000:
+            raise RuntimeError("Sampling random gene pairs seem stuck in infinite loop!")
 
 
 def load_biallelic_snvs(snv_path, genome_mask):
