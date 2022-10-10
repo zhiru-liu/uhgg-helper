@@ -9,6 +9,12 @@ import random
 import config
 
 
+def accession_to_species_name(accession):
+    meta_data = pd.read_csv(config.catalog_path)
+    row = meta_data[meta_data['MGnify accession']==accession]
+    return ';'.join(row['Taxonomy lineage (NCBI)'].item().split(';')[-2:])
+
+
 def gff_to_df(gff_path, save_path=None):
     """
     Parse GFF file downloaded from uhgg into dataframe
@@ -135,7 +141,7 @@ def compute_core_genes(gene_names, coverage_array, coverage_threshold=0.5, preve
     return gene_names[prevelances >= prevelance_threshold]
 
 def load_core_genes(species_id):
-    # return json.load(open('/Volumes/Botein/uhgg/core_genes/{}/core_genes.json'.format(species_id), 'r'))
+    # Return a list of integer gene ids
     path = os.path.join(config.CORE_GENE_DIR, species_id, 'core_genes.json')
     return json.load(open(path, 'r'))
 
@@ -144,6 +150,10 @@ def get_SNVs_table_header(snvs_path):
         head = f.readline()  # will be useful when processing individual genes
     return head.rstrip('\n')
 
+
+def get_SNVs_table_header_from_accession(accession):
+    snvs_path = os.path.join(config.SNV_DIR, "{}_snvs.tsv".format(accession))
+    return get_SNVs_table_header(snvs_path)
 
 def get_genome_names_from_table_header(header):
     return header.split('\t')[4:]
