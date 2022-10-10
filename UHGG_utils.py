@@ -104,10 +104,11 @@ def compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False):
     """
     gene_files = os.listdir(grouped_snvs_base)
     num_genomes = genome_mask.sum()
+    print("In total {} genomes".format(num_genomes))
     processed = 0
     coverage_array = np.zeros((len(gene_files), num_genomes))
     for gene_file in gene_files:
-        gene_file_path = grouped_snvs_base + gene_file
+        gene_file_path = os.path.join(grouped_snvs_base, gene_file)
         dat = pd.read_csv(gene_file_path, delimiter='\t', header=None)
 
         # filtering sites with more than two alleles
@@ -117,7 +118,7 @@ def compute_gene_SNV_coverage(grouped_snvs_base, genome_mask, debug=False):
         snvs = biallelic_dat.iloc[:, 4:].astype(int).to_numpy()
         snvs = snvs[:, genome_mask]
 
-        covered = (snvs != 255).astype(int)
+        covered = (snvs != 255).astype(float)
         coverage_array[processed, :] = covered.mean(axis=0)
         if processed % 100 == 0:
             now = datetime.now()
@@ -143,7 +144,9 @@ def compute_core_genes(gene_names, coverage_array, coverage_threshold=0.5, preve
 def load_core_genes(species_id):
     # Return a list of integer gene ids
     path = os.path.join(config.CORE_GENE_DIR, species_id, 'core_genes.json')
-    return json.load(open(path, 'r'))
+    genes = json.load(open(path, 'r'))
+    # work with integer gene ids
+    return [int(x) for x in genes]
 
 def get_SNVs_table_header(snvs_path):
     with open(snvs_path, 'r') as f:
@@ -196,10 +199,11 @@ def sample_random_pair_of_genes(files, core_genes, gene_df):
     :param gene_df: parsed from gff_to_df
     :return: two gene file names
     """
+    count = 0
     while True:
         file1, file2 = random.sample(files, 2)
-        id1 = int(file1.split('.')[0].split('-')[-1])
-        id2 = int(file2.split('.')[0].split('-')[-1])
+        id1 = int(file1.split('.')[0].split('-')[1])
+        id2 = int(file2.split('.')[0].split('-')[1])
         if np.abs(id1-id2) < 15:
             continue
         type1 = gene_df.loc[id1, 'Type']
@@ -208,6 +212,9 @@ def sample_random_pair_of_genes(files, core_genes, gene_df):
             continue
         if (id1 in core_genes) and (id2 in core_genes):
             return file1, file2
+        count += 1
+        if count >= 1000:
+            raise RuntimeError("Sampling random gene pairs seem stuck in infinite loop!")
 
 
 def load_biallelic_snvs(snv_path, genome_mask):
