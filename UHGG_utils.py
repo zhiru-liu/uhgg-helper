@@ -187,8 +187,9 @@ def get_non_redundant_genome_mask(genomes_metadata, mgnify_accession, genomes):
     :param genomes: List of genome names as in the header of SNV tables
     :return: a boolean mask for unique genomes
     """
-    speices_genomes = genomes_metadata[genomes_metadata['MGnify_accession'] == mgnify_accession]['Genome'].to_numpy()
-    return np.isin(genomes, speices_genomes)
+    species_genomes = genomes_metadata[genomes_metadata['MGnify_accession'] == mgnify_accession]['Genome']
+    species_genomes = np.array(species_genomes)
+    return np.isin(genomes, species_genomes)
 
 
 def sample_random_pair_of_genes(files, core_genes, gene_df):
