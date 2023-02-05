@@ -218,6 +218,11 @@ def sample_random_pair_of_genes(files, core_genes, gene_df):
             raise RuntimeError("Sampling random gene pairs seem stuck in infinite loop!")
 
 
+def load_biallelic_snvs_raw(snv_path):
+    dat = pd.read_csv(snv_path, delimiter='\t', header=None)
+    dat.sort_values(by=1, inplace=True)  # column 1 is the position along reference genome
+    return dat
+
 def load_biallelic_snvs(snv_path, genome_mask):
     """
     Handy function for loading the snv table of a single gene
@@ -365,3 +370,10 @@ def process_SNV_table_between_genes(filepath1, filepath2, genome_mask, output=No
     else:
         print("No output file provided; aborting")
         return
+
+def load_sfs(accession):
+    sfs_dir = os.path.expandvars("$GROUP_HOME/uhgg/sfs/{}_full.csv".format(accession))
+    sfs = pd.read_csv(sfs_dir, header=0)
+    sfs['Genomes'] = sfs['Gene filename'].apply(lambda x: x.split('-')[0])
+    sfs['Gene ids'] = sfs['Gene filename'].apply(lambda x: x.split('-')[1])
+    return sfs
