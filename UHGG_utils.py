@@ -375,5 +375,5 @@ def load_sfs(accession):
     sfs_dir = os.path.expandvars("$GROUP_HOME/uhgg/sfs/{}_full.csv".format(accession))
     sfs = pd.read_csv(sfs_dir, header=0)
     sfs['Genomes'] = sfs['Gene filename'].apply(lambda x: x.split('-')[0])
-    sfs['Gene ids'] = sfs['Gene filename'].apply(lambda x: x.split('-')[1])
+    sfs['Gene ids'] = sfs['Gene filename'].apply(lambda x: int(x.split('-')[1]))
     return sfs

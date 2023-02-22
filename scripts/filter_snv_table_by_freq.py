@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import sys
 import os
 import argparse
@@ -17,12 +16,13 @@ parser.add_argument('--fmin', type=float, required=True)
 parser.add_argument('--fmax', type=float, required=True)
 args = parser.parse_args()
 
-savepath = args.save_path
+savepath = args.savepath
 suffix = args.savename
 accession = args.accession
 fmin = args.fmin
 fmax = args.fmax
 
+print("Processing {}, freq range {}-{}".format(accession, fmin, fmax))
 # grouped_snvs_base = os.path.join(config.ANNOTATED_SNV_DIR, accession)
 grouped_snvs_base = os.path.expandvars("$GROUP_SCRATCH/uhgg_backup/uhgg/snv_tables_annotated/{}".format(accession))
 gene_files = os.listdir(grouped_snvs_base)
@@ -52,7 +52,7 @@ savepath = os.path.join(savepath, '{}_filtered_snvs_{}.tsv'.format(accession, su
 with open(savepath, 'w') as f:
     for filename in gene_files:
         curr_genome = filename.split('-')[0]
-        curr_gene_id = filename.split('-')[1]
+        curr_gene_id = int(filename.split('-')[1])
         # filter gene type
         if gene_df.loc[curr_gene_id, 'Type'] != 'CDS':
             continue
