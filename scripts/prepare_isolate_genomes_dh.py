@@ -37,8 +37,7 @@ sequence = all_records[0].seq
 
 gff_path = os.path.join(config.GFF_DIR, '{}.gff'.format(accession))
 gene_df = UHGG_utils.gff_to_df(gff_path)
-gene_df.sort_values(by='Start', inplace=True)
-cds_genes = gene_df[gene_df['Feature Type']=='CDS']
+cds_genes = gene_df[gene_df['Type']=='CDS']
 gene_id_to_row = {row['Gene ID']: row for i, row in gene_df.iterrows()}
 
 
@@ -61,7 +60,7 @@ snv_tables = os.listdir(tbl_dir)
 snvs_path = os.path.join(config.SNV_DIR, '{}_snvs.tsv'.format(accession))
 header = UHGG_utils.get_SNVs_table_header(snvs_path)
 genome_names = UHGG_utils.get_genome_names_from_table_header(header)
-genomes_metadata = pd.read_csv('genomes-nr_metadata.tsv', delimiter='\t')
+genomes_metadata = pd.read_csv(config.nr_genome_path, delimiter='\t')
 genome_mask = get_isolate_genome_mask(genomes_metadata, accession, genome_names)
 
 good_genomes = np.array(genome_names)[genome_mask]
@@ -112,9 +111,9 @@ for filename in snv_tables:
 
     biallelic_dat = true_snvs.groupby(1).filter(lambda x: x.shape[0] == 1).copy()
     biallelic_dat.sort_values(by=1, inplace=True)
-    snvs = biallelic_dat.iloc[:, 4:].astype(int).to_numpy()
+    snvs = biallelic_dat.iloc[:, 4:].astype(int).values
     snvs = snvs[:, genome_mask]
-    loc_mask = biallelic_dat.iloc[:, 1].to_numpy() - 1
+    loc_mask = biallelic_dat.iloc[:, 1].values - 1
     snp_array[loc_mask] = snvs == 1
     covered_array[loc_mask] = snvs != 255
 
@@ -126,7 +125,8 @@ for filename in snv_tables:
             break
 
 datadir = os.path.join(config.DH_DIR, accession)
-os.makedirs(datadir, exist_ok=True)
+if not os.path.exists(datadir):
+    os.makedirs(datadir)
 
 np.save(os.path.join(datadir, 'chromosomes'), chromos)
 np.save(os.path.join(datadir, 'locations'), locations)
