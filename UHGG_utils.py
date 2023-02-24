@@ -184,6 +184,16 @@ def get_genome_names(accession):
     genome_names = get_genome_names_from_table_header(header)
     return genome_names
 
+
+def get_non_redundant_genome_mask_by_accession(accession):
+    snvs_path = os.path.join(config.SNV_DIR, '{}_snvs.tsv'.format(accession))
+    header = get_SNVs_table_header(snvs_path)
+    genome_names = get_genome_names_from_table_header(header)
+    genomes_metadata = pd.read_csv(config.nr_genome_path, delimiter='\t')
+    genome_mask = get_non_redundant_genome_mask(genomes_metadata, accession, genome_names)
+    return genome_mask
+
+
 def get_non_redundant_genome_mask(genomes_metadata, mgnify_accession, genomes):
     """
     According to metadata, the total # of genomes can be a few times larger than the # of non-redundant genome
