@@ -98,15 +98,13 @@ for filename in snv_tables:
     dat = pd.read_csv(path, delimiter='\t', header=None)
     all_covered = dat.iloc[:, 4:].iloc[:, genome_mask] != 255
     covered_genome_mask = all_covered.mean(axis=0) > 0.5
-    covered_array[gene_start - 1:gene_end, :][:,
-    covered_genome_mask] = 1  # as long as covered in snv sites, should be covered in the whole gene
+    covered_array[gene_start - 1:gene_end, :][:, covered_genome_mask] = 1  # as long as covered in snv sites, should be covered in the whole gene
 
     all_snvs = dat.iloc[:, 4:].iloc[:, genome_mask]
     fracs = (all_snvs == 1).sum(axis=1) / (all_snvs != 255).sum(axis=1).astype(float)
     true_snvs = dat[fracs > 0]
 
-    multi_allelic_site_pos = true_snvs.groupby(1).filter(lambda x: x.shape[0] > 1).iloc[:,
-                             1].unique() - 1  # minus 1 to shift to 0 indexing
+    multi_allelic_site_pos = true_snvs.groupby(1).filter(lambda x: x.shape[0] > 1).iloc[:, 1].unique() - 1  # minus 1 to shift to 0 indexing
     # record how many sites are multi allelic among the isolates
     multi_allele_sites.append(len(multi_allelic_site_pos))
     # treat these sites as missing data
