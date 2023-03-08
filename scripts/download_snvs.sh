@@ -11,7 +11,7 @@ while read p; do
   snv_src="${uhgg_ftp}snv_catalogue/${accession}.tsv.tar.lz4"
   save_path="${GROUP_SCRATCH}/uhgg/snvs/"
   file="${save_path}/${accession}.tsv.tar.lz4"
-  if [[ -f "$save_path" ]]; then
+  if [[ -f "$file" ]]; then
     echo "$file exists."
     continue
   fi

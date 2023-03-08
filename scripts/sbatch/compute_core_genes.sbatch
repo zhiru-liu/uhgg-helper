@@ -6,12 +6,12 @@
 #SBATCH -p normal
 #SBATCH -c 1
 #SBATCH --mem=4GB
-#SBATCH --array=2
+#SBATCH --array=1-10
 
 module load python/3.6.1
 module load py-pandas/1.0.3_py36
 export PYTHONPATH=$PYTHONPATH:"${HOME}/uhgg-helper/"
 
 #accession="MGYG-HGUT-02492"
-accession=`sed -n "${SLURM_ARRAY_TASK_ID}p" < ../accession_list.txt`
+accession=`sed -n "${SLURM_ARRAY_TASK_ID}p" < ../isolate_species.txt`
 python3 ../compute_species_core_genes.py $accession
