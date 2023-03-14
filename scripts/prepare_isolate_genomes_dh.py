@@ -47,6 +47,7 @@ genomes_metadata = pd.read_csv(config.nr_genome_path, delimiter='\t')
 genome_mask = get_isolate_genome_mask(genomes_metadata, accession, genome_names)
 good_genomes = np.array(genome_names)[genome_mask]
 num_isolates = np.sum(genome_mask)
+print("{} has {} isolates".format(accession, num_isolates))
 
 tbl_dir = os.path.join(config.SNV_TABLE_DIR, accession)
 snv_tables = os.listdir(tbl_dir)
@@ -73,10 +74,13 @@ full_snp_array = []
 full_covered_array = []
 for contig in all_contigs:
     # contigs that have no snv tables will be skipped
+    print("Processing {}".format(contig))
     sequence = contig_to_seq[contig]
+    contig_cds_genes = cds_genes[cds_genes['Contig']==contig]
+    print("Current contig has {} CDS genes".format(contig_cds_genes.shape[0]))
     # annotate the ref genome contig
     site_pairs = []
-    for idx, row in cds_genes.iterrows():
+    for idx, row in contig_cds_genes.iterrows():
         start = row['Start']
         end = row['End']
         assert((end - start + 1)%3 == 0)  # require all coding genes to have the whole reading frames; can improve later
@@ -91,7 +95,6 @@ for contig in all_contigs:
 
     # initialize all the data arrays
     genome_len = len(sequence)
-    print("{} has {} isolates".format(accession, num_isolates))
     snp_array = np.zeros((genome_len, num_isolates))
     covered_array = np.zeros((genome_len, num_isolates), dtype=bool)
     chromos = np.full(genome_len, contig_name)
@@ -106,6 +109,7 @@ for contig in all_contigs:
         gene_names[loc-1] = gene_id
 
     contig_snv_tables = contig_to_tables[contig]
+    print("Has in total {} genes".format(len(contig_snv_tables)))
     multi_allele_sites = []
     for filename in contig_snv_tables:
         # now iterate over all the genes in this contig
@@ -139,11 +143,11 @@ for contig in all_contigs:
         covered_array[loc_mask] = snvs != 255
 
         num_processed += 1
-        if num_processed % 200 == 0:
-            print("Finished {} genes".format(num_processed))
-            print(datetime.now())
-            if DEBUG:
-                break
+	if num_processed % 200 == 0:
+	    print("Finished {} genes".format(num_processed))
+	    print(datetime.now())
+	    if DEBUG:
+		break
     full_chromos.append(chromos)
     full_locations.append(locations)
     full_variants.append(variants)
@@ -151,19 +155,25 @@ for contig in all_contigs:
     full_pvalues.append(pvalues)
     full_snp_array.append(snp_array)
     full_covered_array.append(covered_array)
+    if DEBUG:
+        # stop after finishing one contig
+        break
 
 datadir = os.path.join(config.DH_DIR, accession)
 if not os.path.exists(datadir):
     os.makedirs(datadir)
 
-chromos = np.vstack(full_chromos)
-locations = np.vstack(full_locations)
-variants = np.vstack(full_variants)
-gene_names = np.vstack(full_gene_names)
-pvalues = np.vstack(full_pvalues)
+chromos = np.concatenate(full_chromos)
+locations = np.concatenate(full_locations)
+variants = np.concatenate(full_variants)
+gene_names = np.concatenate(full_gene_names)
+pvalues = np.concatenate(full_pvalues)
 snp_array = np.vstack(full_snp_array)
 covered_array = np.vstack(full_covered_array)
-assert(chromos.shape[1]==num_isolates)  # sanity check that the stack direction is correct
+print(chromos.shape)
+print(snp_array.shape)
+assert(snp_array.shape[1]==num_isolates)  # sanity check that the stack direction is correct
+assert(snp_array.shape[0]==chromos.shape[0])  # sanity check that the stack direction is correct
 
 np.save(os.path.join(datadir, 'chromosomes'), chromos)
 np.save(os.path.join(datadir, 'locations'), locations)

@@ -1,6 +1,8 @@
 dir="${GROUP_SCRATCH}/uhgg/snvs/"
-for file in ${dir}*.tsv.tar.lz4;
-do
-  echo $file;
-  lz4 -dc < $file | tar -C $dir -xvf -
-done;
+file=$1
+while read p; do
+  accession=$p
+  filename="${dir}${accession}.tsv.tar.lz4"
+  echo $filename;
+  lz4 -dc < $filename | tar -C $dir -xvf -
+done <$file
