@@ -66,12 +66,22 @@ def annotate_site_types(seq, strand):
         seq = seq.reverse_complement()
     for i in range(len(seq) // 3):
         codon = str(seq[i*3:i*3+3])
-        types.append(codon_type_dict[codon])
+        # check if the sequence contain ambiguous nucleotide
+        bad_nn = False
+        for nn in codon:
+            if nn not in allowed_basepairs:
+                bad_nn = True
+        if bad_nn:
+            types.append(['NA', 'NA', 'NA'])
+        else:
+            types.append(codon_type_dict[codon])
     res = np.hstack(types)
     if strand == '-':
         res = res[::-1]
     return res
 
+
+allowed_basepairs = {'A', 'T', 'C', 'G'}
 codons = pd.read_csv(os.path.join(config.ROOT_DIR, 'dat', 'codons.csv'))
 codon_dict = {row['Codon']:row['AA'] for i, row in codons.iterrows()}
 codon_type_dict, codon_mut_dict = compute_mut_type_dicts()
