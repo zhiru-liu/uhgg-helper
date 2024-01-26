@@ -23,8 +23,8 @@ fmin = args.fmin
 fmax = args.fmax
 
 print("Processing {}, freq range {}-{}".format(accession, fmin, fmax))
-# grouped_snvs_base = os.path.join(config.ANNOTATED_SNV_DIR, accession)
-grouped_snvs_base = os.path.expandvars("$GROUP_SCRATCH/uhgg_backup/uhgg/snv_tables_annotated/{}".format(accession))
+grouped_snvs_base = os.path.join(config.ANNOTATED_SNV_DIR, accession)
+#grouped_snvs_base = os.path.expandvars("$GROUP_SCRATCH/uhgg_backup/uhgg/snv_tables_annotated/{}".format(accession))
 gene_files = os.listdir(grouped_snvs_base)
 
 def filename_to_gene_id(filename):
@@ -34,7 +34,8 @@ def filename_to_gene_id(filename):
 core_genes = UHGG_utils.load_core_genes(accession)
 gff_path = os.path.join(config.GFF_DIR, '{}.gff'.format(accession))
 gene_df = UHGG_utils.gff_to_df(gff_path)
-snv_dir = os.path.expandvars("$GROUP_SCRATCH/uhgg_backup/uhgg/snvs/")
+#snv_dir = os.path.expandvars("$GROUP_SCRATCH/uhgg_backup/uhgg/snvs/")
+snv_dir = config.SNV_DIR
 snvs_path = os.path.join(snv_dir, '{}_snvs.tsv'.format(accession))
 header = UHGG_utils.get_SNVs_table_header(snvs_path)
 genome_names = UHGG_utils.get_genome_names_from_table_header(header)

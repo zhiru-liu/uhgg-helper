@@ -6,7 +6,7 @@ import config
 from datetime import datetime
 
 
-def compute_pairwise_distances(accession, grouped_snvs_base, genome_mask, gene_df, header=None):
+def compute_pairwise_distances(accession, grouped_snvs_base, genome_mask, gene_df, header=None, debug=False):
     species_pd_dir = os.path.join(config.PD_DIR, '{}'.format(accession))
     os.makedirs(species_pd_dir, exist_ok=True)
 
@@ -24,6 +24,7 @@ def compute_pairwise_distances(accession, grouped_snvs_base, genome_mask, gene_d
     total_sites = 0
 
     gene_files = os.listdir(grouped_snvs_base)
+    print("Total {} genes to process".format(len(gene_files)))
     for gene_file in gene_files:
         gene_file_path = os.path.join(grouped_snvs_base, gene_file)
         items = gene_file.split('.')[0].split('-')
@@ -65,6 +66,9 @@ def compute_pairwise_distances(accession, grouped_snvs_base, genome_mask, gene_d
             now = datetime.now()
             current_time = now.strftime("%H:%M:%S")
             print("Finished {} at {}".format(processed, current_time))
+            if debug and (processed > 100):
+                print("Debug mode: exitting")
+                break
         processed += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")

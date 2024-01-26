@@ -55,6 +55,10 @@ def gff_to_df(gff_path, save_path=None):
     return df
 
 
+def load_gene_df_by_accession(accession):
+    gff_path = os.path.join(config.GFF_DIR, accession + '.gff')
+    return gff_to_df(gff_path)
+
 def process_SNVs_table(snvs_path, gene_df, save_path):
     """
     Split the SNV table into smaller ones by gene
