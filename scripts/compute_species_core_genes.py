@@ -1,3 +1,8 @@
+"""
+Compute core genes for a species based on coverage across samples
+Core is defined to be genes that are >50% covered in >90% of samples
+"""
+
 import pandas as pd
 import numpy as np
 import sys
