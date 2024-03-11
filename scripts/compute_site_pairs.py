@@ -1,3 +1,21 @@
+"""
+This script is used to compute site pairs within and between genes for a given MGNIFY accession.
+It takes a single command line argument, which is the MGNIFY accession.
+The script processes the SNV files associated with the genes in the accession and generates output files
+containing information about the site pairs.
+
+The script performs the following steps:
+1. Reads the MGNIFY accession from the command line arguments.
+2. Loads necessary configurations and utilities.
+3. Creates an output directory for the site pair files.
+4. Processes SNV files of each gene in the species.
+5. Processes SNV files between randomly selected pairs of genes in the accession.
+6. Generates output files containing the haplotype counts between the site pairs.
+
+Note: This script requires the presence of certain directories and files as specified in the 'config' module.
+"""
+
+# Rest of the code...
 from datetime import datetime
 import os
 import sys
@@ -8,7 +26,7 @@ import numpy as np
 
 DEBUG = False
 if len(sys.argv) !=2:
-    print("Usage: python compute_species_core_genes.py MGNIFY_ACCESSION")
+    print("Usage: python compute_site_pairs.py MGNIFY_ACCESSION")
     quit()
 accession = sys.argv[1]
 
@@ -24,6 +42,11 @@ if not os.path.exists(output_path):
     os.makedirs(output_path)
 output_path = os.path.join(output_path, '{}.txt'.format(accession))
 
+# write header
+# n11: number of haplotypes with both SNVs (i.e. AB)
+# n10: number of haplotypes with only the first SNV (i.e. Ab), etc.
+# ell: distance between the two sites
+# type: 0 for two synonymous SNVs, 1 for one synonymous and one non-synonymous SNV, 2 for two non-synonymous SNVs
 with open(output_path, 'w') as f:
     f.write(' '.join(('n11', 'n10', 'n01', 'n00', 'ell', 'type')) + '\n')
 
@@ -43,10 +66,7 @@ genome_mask = UHGG_utils.get_non_redundant_genome_mask(genomes_metadata, accessi
 print("Start processing within gene")
 for gene_file in gene_files:
     gene_file_path = os.path.join(grouped_snvs_base, gene_file)
-#    items = gene_file.split('.')[0].split('-')
-#    gene_id = int(items[-1])
     gene_id = filename_to_gene_id(gene_file)
-#    contig = items[0]
     if processed % 100 == 0:
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
@@ -82,3 +102,4 @@ for i in range(n_pairs):
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 print("Finished all between gene at {}".format(current_time))
+
